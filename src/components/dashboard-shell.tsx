@@ -11,6 +11,7 @@ const navItems = {
   tenant: [
     { href: '/dashboard', label: 'Activity' },
     { href: '/dashboard/saved', label: 'Saved homes' },
+    { href: '/dashboard/roommates', label: 'Roommates' },
     { href: '/dashboard/profile', label: 'Profile' },
     { href: '/dashboard/payments', label: 'Payments' },
     { href: '/dashboard/notifications', label: 'Notifications' },

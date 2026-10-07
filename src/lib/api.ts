@@ -21,6 +21,11 @@ export interface Profile {
   profilePhoto?: string | null;
   bio?: string | null;
   occupation?: string | null;
+  gender?: 'MALE' | 'FEMALE' | 'ANY' | null;
+  smoker?: boolean | null;
+  hasPets?: boolean | null;
+  sleepSchedule?: 'EARLY_BIRD' | 'NIGHT_OWL' | 'FLEXIBLE' | null;
+  cleanliness?: 'VERY_TIDY' | 'MODERATE' | 'RELAXED' | null;
   budgetMin?: number | string | null;
   budgetMax?: number | string | null;
   preferredAreas?: string[];
@@ -150,6 +155,36 @@ export interface RoomlyNotification {
   meta?: Record<string, unknown> | null;
   isRead: boolean;
   createdAt: string;
+}
+
+export interface RoommateProfile {
+  id: string;
+  name: string;
+  profilePhoto?: string | null;
+  bio?: string | null;
+  occupation?: string | null;
+  gender?: string | null;
+  sleepSchedule?: string | null;
+  cleanliness?: string | null;
+  budgetMin?: number | string | null;
+  budgetMax?: number | string | null;
+  preferredAreas?: string[];
+}
+
+export interface RoommateMatch {
+  tenant: RoommateProfile;
+  matchScore: number;
+}
+
+export interface RoommateRequest {
+  id: string;
+  status: 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'CANCELLED';
+  matchScore?: number | null;
+  message?: string | null;
+  createdAt: string;
+  sender?: RoommateProfile;
+  receiver?: RoommateProfile;
+  listing?: Pick<ListingItem, 'id' | 'title' | 'city'> | null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -394,4 +429,22 @@ export const notificationsApi = {
     markAsRead: (id: string) =>
       apiFetch<RoomlyNotification>(`/notifications/${id}/read`, { method: 'PATCH' }),
     markAllAsRead: () => apiFetch<null>('/notifications/read-all', { method: 'PATCH' }),
+};
+
+export const roommatesApi = {
+  getMatches: () => apiFetch<RoommateMatch[]>('/roommates/matches'),
+  getSentRequests: () => apiFetch<RoommateRequest[]>('/roommates/requests/sent'),
+  getReceivedRequests: () => apiFetch<RoommateRequest[]>('/roommates/requests/received'),
+  sendRequest: (payload: { receiverId: string; message?: string }) =>
+    apiFetch<RoommateRequest>('/roommates/requests', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  respond: (id: string, response: 'ACCEPTED' | 'DECLINED') =>
+    apiFetch<RoommateRequest>(`/roommates/requests/${id}/respond`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: response }),
+    }),
+  cancel: (id: string) =>
+    apiFetch<RoommateRequest>(`/roommates/requests/${id}/cancel`, { method: 'PATCH' }),
 };
