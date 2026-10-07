@@ -142,6 +142,16 @@ export interface PaymentSession {
   transactionId: string;
 }
 
+export interface RoomlyNotification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  meta?: Record<string, unknown> | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -377,4 +387,11 @@ export const usersApi = {
       method: 'PATCH',
       body: JSON.stringify(payload),
     }),
+};
+
+export const notificationsApi = {
+    getMine: () => apiFetch<RoomlyNotification[]>('/notifications'),
+    markAsRead: (id: string) =>
+      apiFetch<RoomlyNotification>(`/notifications/${id}/read`, { method: 'PATCH' }),
+    markAllAsRead: () => apiFetch<null>('/notifications/read-all', { method: 'PATCH' }),
 };

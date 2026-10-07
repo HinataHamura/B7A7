@@ -6,18 +6,21 @@ const navItems = {
     { href: '/admin', label: 'Overview' },
     { href: '/admin/manage', label: 'Manage' },
     { href: '/admin/reports', label: 'Reports' },
+    { href: '/admin/notifications', label: 'Notifications' },
   ],
   tenant: [
     { href: '/dashboard', label: 'Activity' },
     { href: '/dashboard/saved', label: 'Saved homes' },
     { href: '/dashboard/profile', label: 'Profile' },
     { href: '/dashboard/payments', label: 'Payments' },
+    { href: '/dashboard/notifications', label: 'Notifications' },
   ],
   landlord: [
     { href: '/provider', label: 'Overview' },
     { href: '/provider/listings', label: 'Listings' },
     { href: '/provider/earnings', label: 'Earnings' },
     { href: '/provider/profile', label: 'Profile' },
+    { href: '/provider/notifications', label: 'Notifications' },
   ],
 };
 
