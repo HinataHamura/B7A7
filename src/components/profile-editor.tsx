@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import Image from 'next/image';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { authApi, usersApi, type Profile } from '@/lib/api';
+import { authApi, uploadsApi, usersApi, type Profile } from '@/lib/api';
 import { DashboardShell } from '@/components/dashboard-shell';
 
 const profileSchema = z.object({
@@ -30,6 +31,7 @@ type ProfileValues = z.infer<typeof profileSchema>;
 
 export default function ProfileEditor({ role }: { role: 'TENANT' | 'LANDLORD' }) {
   const queryClient = useQueryClient();
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
   const meQuery = useQuery({ queryKey: ['current-user'], queryFn: authApi.getMe });
   const userProfile = role === 'TENANT' ? meQuery.data?.tenantProfile : meQuery.data?.landlordProfile;
   const form = useForm<ProfileValues>({
@@ -64,12 +66,27 @@ export default function ProfileEditor({ role }: { role: 'TENANT' | 'LANDLORD' })
         budgetMax: userProfile.budgetMax == null ? undefined : Number(userProfile.budgetMax),
         preferredAreas: userProfile.preferredAreas?.join(', ') ?? '',
       });
+      setProfilePhotoUrl(userProfile.profilePhoto ?? '');
     }
   }, [form, userProfile]);
 
+  const photoMutation = useMutation({
+    mutationFn: uploadsApi.uploadProfilePhoto,
+    onSuccess: (urls) => {
+      const uploadedUrl = urls[0];
+      if (!uploadedUrl) {
+        toast.error('The upload did not return a profile photo URL.');
+        return;
+      }
+      setProfilePhotoUrl(uploadedUrl);
+      toast.success('Profile photo uploaded. Save your profile to finish.');
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : 'Could not upload profile photo.'),
+  });
+
   const mutation = useMutation({
     mutationFn: (values: ProfileValues) => {
-      const basicProfile = { name: values.name, phone: values.phone, bio: values.bio };
+      const basicProfile = { name: values.name, phone: values.phone, bio: values.bio, profilePhoto: profilePhotoUrl || undefined };
       if (role !== 'TENANT') return usersApi.updateProfile(basicProfile);
 
       const tenantProfile: Partial<Profile> = {
@@ -93,6 +110,21 @@ export default function ProfileEditor({ role }: { role: 'TENANT' | 'LANDLORD' })
   });
   const dashboardRole = role === 'TENANT' ? 'tenant' : 'landlord';
 
+  function handlePhotoSelect(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+      toast.error('Choose a JPEG, PNG, WEBP, or GIF image.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Profile photos must be 5 MB or smaller.');
+      return;
+    }
+    photoMutation.mutate(file);
+  }
+
   return (
     <DashboardShell title="Profile" role={dashboardRole}>
       <div className="max-w-2xl rounded-[28px] border border-slate-200 bg-white p-6 shadow-soft sm:p-8">
@@ -104,6 +136,30 @@ export default function ProfileEditor({ role }: { role: 'TENANT' | 'LANDLORD' })
           <div className="mt-6 h-40 animate-pulse rounded-xl bg-slate-100" />
         ) : (
           <form onSubmit={form.handleSubmit((values) => mutation.mutate(values))} className="mt-6 space-y-4">
+            <div className="flex flex-wrap items-center gap-4 rounded-2xl bg-slate-50 p-4">
+              <div className="relative h-20 w-20 overflow-hidden rounded-full bg-primary-100">
+                {profilePhotoUrl ? (
+                  <Image src={profilePhotoUrl} alt="Your profile photo" fill sizes="80px" unoptimized className="object-cover" />
+                ) : (
+                  <span className="flex h-full items-center justify-center text-2xl font-bold text-primary-700" aria-hidden="true">
+                    {(form.watch('name').trim()[0] ?? 'R').toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div>
+                <label htmlFor="profile-photo" className="block text-sm font-semibold text-slate-900">Profile photo</label>
+                <p className="mt-1 text-xs text-slate-500">JPEG, PNG, WEBP, or GIF · up to 5 MB</p>
+                <input
+                  id="profile-photo"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handlePhotoSelect}
+                  disabled={photoMutation.isPending}
+                  className="mt-2 block w-full text-xs text-slate-600 file:mr-3 file:rounded-full file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary-700"
+                />
+                {photoMutation.isPending && <p role="status" className="mt-1 text-xs text-primary-700">Uploading photo…</p>}
+              </div>
+            </div>
             <div>
               <label htmlFor="profile-name" className="mb-2 block text-sm font-medium text-slate-700">Full name</label>
               <input id="profile-name" {...form.register('name')} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" />

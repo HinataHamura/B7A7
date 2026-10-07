@@ -385,6 +385,14 @@ export const uploadsApi = {
       body,
     });
   },
+  uploadProfilePhoto: async (file: File) => {
+    const body = new FormData();
+    body.append('images', file);
+    return apiFetch<string[]>('/upload/images?folder=avatars', {
+      method: 'POST',
+      body,
+    });
+  },
 };
 
 export const bookingsApi = {
