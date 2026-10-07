@@ -60,6 +60,8 @@ export interface ListingItem {
   images?: string[];
   amenities?: string[];
   genderPreference?: string | null;
+  latitude?: number;
+  longitude?: number;
   landlord?: Profile;
   createdAt?: string;
 }
@@ -227,6 +229,55 @@ export const listingsApi = {
   getById: (id: string) => apiFetch<ListingItem>(`/listings/${id}`),
   getMine: () => apiFetch<ListingItem[]>('/listings/my-listings'),
   getLandlordStats: () => apiFetch<LandlordStats>('/listings/dashboard-stats'),
+  create: (payload: ListingPayload) =>
+    apiFetch<ListingItem>('/listings', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  update: (id: string, payload: Partial<ListingPayload> & { status?: string }) =>
+    apiFetch<ListingItem>(`/listings/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+  remove: (id: string) =>
+    apiFetch<null>(`/listings/${id}`, {
+      method: 'DELETE',
+    }),
+  toggleSaved: (id: string) =>
+    apiFetch<{ saved: boolean }>(`/listings/${id}/save`, {
+      method: 'POST',
+    }),
+};
+
+export interface ListingPayload {
+  title: string;
+  description: string;
+  type: 'ENTIRE_PLACE' | 'PRIVATE_ROOM' | 'SHARED_ROOM';
+  rentAmount: number;
+  securityDeposit: number;
+  bedrooms: number;
+  bathrooms: number;
+  maxOccupants: number;
+  addressLine: string;
+  city: string;
+  area: string;
+  latitude: number;
+  longitude: number;
+  amenities: string[];
+  images: string[];
+  genderPreference?: 'MALE' | 'FEMALE' | 'ANY';
+  status?: 'DRAFT' | 'PUBLISHED' | 'UNAVAILABLE' | 'ARCHIVED';
+}
+
+export const uploadsApi = {
+  uploadListingImages: async (files: File[]) => {
+    const body = new FormData();
+    files.forEach((file) => body.append('images', file));
+    return apiFetch<string[]>('/upload/images?folder=listings', {
+      method: 'POST',
+      body,
+    });
+  },
 };
 
 export const bookingsApi = {
