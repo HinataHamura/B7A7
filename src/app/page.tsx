@@ -1,11 +1,67 @@
 import Link from 'next/link';
 import { ArrowRight, Building2, ShieldCheck, Sparkles, Wallet } from 'lucide-react';
+import { ListingPhoto } from '@/components/listing-photo';
+import { API_BASE_URL } from '@/lib/api';
+import { formatCurrency } from '@/lib/format';
 
-const stats = [
-  { value: '2.4k+', label: 'Verified rooms' },
-  { value: '98%', label: 'Tenant satisfaction' },
-  { value: '24/7', label: 'Support coverage' },
-];
+export const dynamic = 'force-dynamic';
+
+interface FeaturedListing {
+  id: string;
+  title: string;
+  city: string;
+  area: string;
+  rentAmount: number | string;
+  bedrooms: number;
+  images?: string[];
+  landlord?: { isVerifiedHost?: boolean };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isFeaturedListing(value: unknown): value is FeaturedListing {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.id === 'string' &&
+    typeof value.title === 'string' &&
+    typeof value.city === 'string' &&
+    typeof value.area === 'string' &&
+    (typeof value.rentAmount === 'number' || typeof value.rentAmount === 'string') &&
+    typeof value.bedrooms === 'number' &&
+    (value.images === undefined || (Array.isArray(value.images) && value.images.every((image) => typeof image === 'string'))) &&
+    (value.landlord === undefined || (
+      isRecord(value.landlord) &&
+      (value.landlord.isVerifiedHost === undefined || typeof value.landlord.isVerifiedHost === 'boolean')
+    ))
+  );
+}
+
+async function getFeaturedListings() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/listings?limit=3`, { cache: 'no-store' });
+    if (!response.ok) {
+      console.error(`Featured listings request failed with status ${response.status}.`);
+      return { listings: [] as FeaturedListing[], total: 0, error: true };
+    }
+
+    const payload: unknown = await response.json();
+    if (!isRecord(payload) || !Array.isArray(payload.data)) {
+      console.error('Featured listings API returned an unexpected response shape.');
+      return { listings: [] as FeaturedListing[], total: 0, error: true };
+    }
+
+    const listings = payload.data.filter(isFeaturedListing);
+    const total = isRecord(payload.meta) && typeof payload.meta.total === 'number'
+      ? payload.meta.total
+      : listings.length;
+    return { listings, total, error: false };
+  } catch (error) {
+    console.error('Featured listings could not be fetched.', error);
+    return { listings: [] as FeaturedListing[], total: 0, error: true };
+  }
+}
 
 const features = [
   {
@@ -25,7 +81,10 @@ const features = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { listings, total, error } = await getFeaturedListings();
+  const featured = listings[0];
+
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="bg-mesh-gradient">
@@ -58,7 +117,7 @@ export default function HomePage() {
                 Roomly helps tenants find better homes and landlords manage trusted listings with seamless digital booking and payment flows.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
-                <Link href="/login" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-600">
+                <Link href="/services" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-600">
                   Explore listings <ArrowRight size={16} />
                 </Link>
                 <Link href="/register" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
@@ -67,41 +126,55 @@ export default function HomePage() {
               </div>
 
               <div className="mt-10 grid gap-4 sm:grid-cols-3">
-                {stats.map((stat) => (
-                  <div key={stat.label} className="glass-panel p-4">
-                    <div className="text-2xl font-bold text-slate-900">{stat.value}</div>
-                    <div className="mt-1 text-sm text-slate-600">{stat.label}</div>
-                  </div>
-                ))}
+                <div className="glass-panel p-4">
+                  <div className="text-2xl font-bold text-slate-900">{error ? '—' : total}</div>
+                  <div className="mt-1 text-sm text-slate-600">Published homes</div>
+                </div>
+                <div className="glass-panel p-4">
+                  <div className="text-2xl font-bold text-slate-900">3</div>
+                  <div className="mt-1 text-sm text-slate-600">Account roles</div>
+                </div>
+                <div className="glass-panel p-4">
+                  <div className="text-2xl font-bold text-slate-900">SSLCommerz</div>
+                  <div className="mt-1 text-sm text-slate-600">Secure checkout</div>
+                </div>
               </div>
             </div>
 
             <div className="glass-panel overflow-hidden p-4 sm:p-5">
-              <div className="rounded-2xl bg-slate-900 p-5 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-slate-300">Featured stay</p>
-                    <h2 className="mt-2 text-2xl font-bold">Skyline Residence</h2>
+              {featured ? (
+                <article className="overflow-hidden rounded-2xl bg-slate-900 text-white">
+                  <div className="relative h-52 bg-slate-800">
+                    <ListingPhoto images={featured.images} title={featured.title} sizes="(max-width: 1024px) 100vw, 40vw" />
                   </div>
-                  <span className="rounded-full bg-emerald-500/20 px-2.5 py-1 text-xs font-semibold text-emerald-300">
-                    Verified
-                  </span>
+                  <div className="p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm text-slate-300">Featured live listing</p>
+                        <h2 className="mt-2 text-2xl font-bold">{featured.title}</h2>
+                      </div>
+                      {featured.landlord?.isVerifiedHost && (
+                        <span className="shrink-0 rounded-full bg-emerald-500/20 px-2.5 py-1 text-xs font-semibold text-emerald-300">Verified host</span>
+                      )}
+                    </div>
+                    <p className="mt-2 text-sm text-slate-300">{featured.area}, {featured.city}</p>
+                    <p className="mt-5 text-xl font-bold">{formatCurrency(featured.rentAmount)}<span className="text-sm font-medium text-slate-300"> / month</span></p>
+                    <p className="mt-2 text-sm text-slate-300">{featured.bedrooms} bedroom{featured.bedrooms === 1 ? '' : 's'}</p>
+                    <Link href={`/services/${featured.id}`} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-emerald-200">
+                      View this home <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                </article>
+              ) : (
+                <div role={error ? 'alert' : undefined} className="flex min-h-[22rem] flex-col items-start justify-center rounded-2xl bg-slate-900 p-6 text-white">
+                  <p className="text-sm font-semibold text-emerald-300">{error ? 'Live listings unavailable' : 'New homes welcome'}</p>
+                  <h2 className="mt-2 text-2xl font-bold">{error ? 'We could not load homes right now.' : 'No published homes just yet.'}</h2>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">{error ? 'Please try browsing again in a moment.' : 'Check back soon or create an account to publish a home.'}</p>
+                  <Link href="/services" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-emerald-200">
+                    Browse listings <ArrowRight size={16} />
+                  </Link>
                 </div>
-                <div className="mt-6 grid gap-3 text-sm text-slate-200">
-                  <div className="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2">
-                    <span>Location</span>
-                    <span className="font-semibold text-white">Dhanmondi, Dhaka</span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2">
-                    <span>Rent</span>
-                    <span className="font-semibold text-white">৳18,000/mo</span>
-                  </div>
-                  <div className="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2">
-                    <span>Room type</span>
-                    <span className="font-semibold text-white">Private room</span>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
