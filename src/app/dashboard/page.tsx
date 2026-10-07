@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { DashboardShell } from '@/components/dashboard-shell';
 import { bookingsApi, paymentsApi, type Payment } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { BookingReviewForm } from '@/components/booking-review-form';
 
 export default function DashboardPage() {
   const queryClient = useQueryClient();
@@ -118,6 +119,15 @@ export default function DashboardPage() {
                         {paymentMutation.isPending ? 'Opening…' : label}
                       </button>
                     ))}
+                  </div>
+                )}
+                {booking.status === 'COMPLETED' && (
+                  <div className="basis-full">
+                    {booking.review ? (
+                      <p className="mt-2 text-sm font-semibold text-emerald-700">Your review: {booking.review.rating}/5 · Verified stay</p>
+                    ) : (
+                      <BookingReviewForm bookingId={booking.id} />
+                    )}
                   </div>
                 )}
               </div>

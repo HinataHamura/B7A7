@@ -11,6 +11,7 @@ import { bookingsApi, listingsApi } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
 import { ListingPhoto } from '@/components/listing-photo';
 import { ListingSaveButton } from '@/components/listing-save-button';
+import { ListingReviews } from '@/components/listing-reviews';
 
 const bookingSchema = z.object({
   moveInDate: z.string().min(1, 'Choose a move-in date').refine(
@@ -120,6 +121,7 @@ export default function ListingDetailsPage() {
             Hosted by <span className="font-semibold text-slate-900">{listing.landlord?.name ?? 'Roomly landlord'}</span>
             {listing.landlord?.isVerifiedHost ? ' · Verified host' : ''}
           </p>
+          <ListingReviews listingId={listing.id} />
         </article>
 
         <aside className="glass-panel h-fit p-6">

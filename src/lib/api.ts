@@ -82,6 +82,22 @@ export interface Booking {
   listing: ListingItem;
   payments?: Payment[];
   tenant?: Profile;
+  review?: ReviewItem | null;
+}
+
+export interface ReviewItem {
+  id: string;
+  rating: number;
+  comment?: string | null;
+  isVerifiedStay: boolean;
+  createdAt: string;
+  tenant?: { name?: string; profilePhoto?: string | null };
+}
+
+export interface ListingReviews {
+  reviews: ReviewItem[];
+  averageRating: number;
+  totalReviews: number;
 }
 
 export interface Payment {
@@ -447,4 +463,14 @@ export const roommatesApi = {
     }),
   cancel: (id: string) =>
     apiFetch<RoommateRequest>(`/roommates/requests/${id}/cancel`, { method: 'PATCH' }),
+};
+
+export const reviewsApi = {
+  getForListing: (listingId: string) =>
+    apiFetch<ListingReviews>(`/reviews/listing/${listingId}`),
+  create: (payload: { bookingId: string; rating: number; comment?: string }) =>
+    apiFetch<ReviewItem>('/reviews', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 };
