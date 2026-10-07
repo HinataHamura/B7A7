@@ -41,7 +41,14 @@ export default function LoginPage() {
     setSessionCookie(role, response.user.email, response.accessToken);
     localStorage.setItem('roomly_user', JSON.stringify(response.user));
     toast.success(`Welcome back, ${response.user.email}`);
-    router.push(getRoleDashboard(role));
+    const roleDashboard = getRoleDashboard(role);
+    const requestedPath = new URLSearchParams(window.location.search).get('next');
+    const destination =
+      requestedPath &&
+      (requestedPath === roleDashboard || requestedPath.startsWith(`${roleDashboard}/`))
+        ? requestedPath
+        : roleDashboard;
+    router.replace(destination);
   };
 
   const handleDemoLogin = async (account: (typeof demoAccounts)[number]) => {

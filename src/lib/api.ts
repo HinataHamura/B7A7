@@ -1,3 +1,5 @@
+import { setAccessToken } from '@/lib/auth';
+
 export type UserRole = 'ADMIN' | 'LANDLORD' | 'TENANT';
 
 export const API_BASE_URL =
@@ -158,9 +160,44 @@ function parseApiMeta(value: unknown): ApiMeta | undefined {
   return { page, limit, total, totalPages };
 }
 
+let refreshRequest: Promise<string | null> | null = null;
+
+async function refreshAccessToken() {
+  if (typeof window === 'undefined') return null;
+  if (!refreshRequest) {
+    refreshRequest = (async () => {
+      let response: Response;
+      try {
+        response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+      } catch {
+        return null;
+      }
+
+      if (!response.ok) return null;
+      const payload: unknown = await response.json().catch(() => null);
+      const data = isRecord(payload) && 'data' in payload ? payload.data : payload;
+      const token = isRecord(data) && typeof data.accessToken === 'string' ? data.accessToken : null;
+      if (token) setAccessToken(token);
+      return token;
+    })();
+  }
+
+  try {
+    return await refreshRequest;
+  } finally {
+    refreshRequest = null;
+  }
+}
+
 async function apiRequest<T>(
   path: string,
   options: RequestInit = {},
+  retryUnauthorized = true,
 ): Promise<ApiResult<T>> {
   const accessToken =
     typeof window === 'undefined' ? null : localStorage.getItem('roomly_access_token');
@@ -174,6 +211,14 @@ async function apiRequest<T>(
     credentials: 'include',
     headers,
   });
+
+  if (response.status === 401 && retryUnauthorized && !path.startsWith('/auth/refresh-token')) {
+    const freshToken = await refreshAccessToken();
+    if (freshToken) return apiRequest<T>(path, options, false);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('roomly:auth-expired'));
+    }
+  }
 
   const payload: unknown = await response.json().catch(() => null);
   if (!response.ok) {

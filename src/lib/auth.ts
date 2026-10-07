@@ -40,12 +40,17 @@ export function setSessionCookie(role: UserRole, email: string, accessToken: str
   const serialized = JSON.stringify(session);
 
   document.cookie = `${AUTH_COOKIE_NAME}=${encodeURIComponent(serialized)}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-  document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=${accessToken}; path=/; max-age=${60 * 15}; SameSite=Lax${secure}`;
+  setAccessToken(accessToken);
   if (typeof window !== 'undefined') {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-    localStorage.setItem(AUTH_TOKEN_KEY, accessToken);
   }
+}
+
+export function setAccessToken(accessToken: string) {
+  if (typeof window === 'undefined') return;
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=${accessToken}; path=/; max-age=${60 * 15}; SameSite=Lax${secure}`;
+  localStorage.setItem(AUTH_TOKEN_KEY, accessToken);
 }
 
 export function clearSessionCookie() {

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { AUTH_TOKEN_COOKIE_NAME } from '@/lib/auth';
 
 const publicRoutes = ['/', '/login', '/register', '/about', '/services', '/contact', '/pricing', '/payment/success', '/payment/cancel'];
 const roleRedirects = {
@@ -8,14 +7,6 @@ const roleRedirects = {
   LANDLORD: '/provider',
   TENANT: '/dashboard',
 } as const;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function isUserRole(value: unknown): value is keyof typeof roleRedirects {
-  return value === 'ADMIN' || value === 'LANDLORD' || value === 'TENANT';
-}
 
 function isPublicPath(pathname: string) {
   return publicRoutes.some(
@@ -36,37 +27,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const accessToken = request.cookies.get(AUTH_TOKEN_COOKIE_NAME)?.value;
-  if (!accessToken) return redirectToLogin(request);
+  const requiredRole = pathname.startsWith('/admin')
+    ? 'ADMIN'
+    : pathname.startsWith('/provider')
+      ? 'LANDLORD'
+      : pathname.startsWith('/dashboard')
+        ? 'TENANT'
+        : null;
+  if (!requiredRole) return NextResponse.next();
+
+  const rawSession = request.cookies.get('roomly_session')?.value;
+  if (!rawSession) return redirectToLogin(request);
 
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? 'https://b7a6.onrender.com/api/v1'}/auth/me`,
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        cache: 'no-store',
-      },
-    );
-    if (!response.ok) return redirectToLogin(request);
-
-    const payload: unknown = await response.json();
-    const data = isRecord(payload) && 'data' in payload ? payload.data : payload;
-    const role = isRecord(data) ? data.role : undefined;
-    if (!isUserRole(role)) return redirectToLogin(request);
-
-    const requiredRole = pathname.startsWith('/admin')
-      ? 'ADMIN'
-      : pathname.startsWith('/provider')
-        ? 'LANDLORD'
-        : pathname.startsWith('/dashboard')
-          ? 'TENANT'
-          : null;
-
-    if (requiredRole && role !== requiredRole) {
-      const destination = roleRedirects[role];
-      return NextResponse.redirect(new URL(destination, request.url));
+    const session = JSON.parse(decodeURIComponent(rawSession)) as { role?: unknown };
+    const role = session.role;
+    if (role !== 'ADMIN' && role !== 'LANDLORD' && role !== 'TENANT') {
+      return redirectToLogin(request);
     }
-
+    if (role !== requiredRole) {
+      return NextResponse.redirect(new URL(roleRedirects[role], request.url));
+    }
     return NextResponse.next();
   } catch {
     return redirectToLogin(request);
