@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LogoutButton } from '@/components/logout-button';
+import { DashboardNav } from '@/components/dashboard-nav';
 
 const navItems = {
   admin: [
@@ -50,14 +50,7 @@ export function DashboardShell({
             </div>
           </div>
 
-          <nav className="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-600">
-            {items.map((item) => (
-              <Link key={item.href} href={item.href} className="rounded-full px-3 py-2 transition hover:bg-slate-100 hover:text-slate-900">
-                {item.label}
-              </Link>
-            ))}
-            <LogoutButton />
-          </nav>
+          <DashboardNav items={items} />
         </div>
       </aside>
 
