@@ -1,7 +1,9 @@
 export type UserRole = 'ADMIN' | 'LANDLORD' | 'TENANT';
 
 export const AUTH_COOKIE_NAME = 'roomly_session';
+export const AUTH_TOKEN_COOKIE_NAME = 'roomly_access_token';
 export const AUTH_STORAGE_KEY = 'roomly_user';
+export const AUTH_TOKEN_KEY = 'roomly_access_token';
 
 export interface SessionData {
   role: UserRole;
@@ -33,20 +35,25 @@ export function getSessionCookie(): SessionData | null {
   }
 }
 
-export function setSessionCookie(role: UserRole, email: string) {
+export function setSessionCookie(role: UserRole, email: string, accessToken: string) {
   const session: SessionData = { role, email };
   const serialized = JSON.stringify(session);
 
   document.cookie = `${AUTH_COOKIE_NAME}=${encodeURIComponent(serialized)}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=${accessToken}; path=/; max-age=${60 * 15}; SameSite=Lax${secure}`;
   if (typeof window !== 'undefined') {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
+    localStorage.setItem(AUTH_TOKEN_KEY, accessToken);
   }
 }
 
 export function clearSessionCookie() {
   document.cookie = `${AUTH_COOKIE_NAME}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  document.cookie = `${AUTH_TOKEN_COOKIE_NAME}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
   if (typeof window !== 'undefined') {
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
   }
 }
 

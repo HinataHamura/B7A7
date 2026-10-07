@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, LogOut } from 'lucide-react';
+import { LogoutButton } from '@/components/logout-button';
 
 const navItems = {
   admin: [
@@ -50,10 +50,7 @@ export function DashboardShell({
                 {item.label}
               </Link>
             ))}
-            <Link href="/login" className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-2 text-white">
-              <LogOut size={16} />
-              Logout
-            </Link>
+            <LogoutButton />
           </nav>
         </div>
       </aside>

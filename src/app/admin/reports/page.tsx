@@ -1,25 +1,10 @@
-import { DashboardShell } from '@/components/dashboard-shell';
+import { Suspense } from 'react';
+import AdminReports from '@/components/admin-reports';
 
 export default function AdminReportsPage() {
   return (
-    <DashboardShell title="Reports" role="admin">
-      <div className="mb-8">
-        <p className="pill">Audit & analytics</p>
-        <h1 className="mt-3 text-3xl font-black text-slate-900">Performance reports</h1>
-      </div>
-
-      <div className="grid gap-5 md:grid-cols-3">
-        {[
-          ['Monthly revenue', '৳820k'],
-          ['Completed bookings', '462'],
-          ['Avg. rating', '4.8/5'],
-        ].map(([label, value]) => (
-          <div key={label} className="glass-panel p-5">
-            <p className="text-sm text-slate-500">{label}</p>
-            <p className="mt-3 text-3xl font-black text-slate-900">{value}</p>
-          </div>
-        ))}
-      </div>
-    </DashboardShell>
+    <Suspense fallback={<main className="container-shell py-10"><div className="glass-panel h-80 animate-pulse bg-slate-100" /></main>}>
+      <AdminReports />
+    </Suspense>
   );
 }

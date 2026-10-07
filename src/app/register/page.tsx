@@ -12,14 +12,14 @@ import { getRoleDashboard, setSessionCookie } from '@/lib/auth';
 const registerSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   email: z.string().email('Please enter a valid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.enum(['TENANT', 'LANDLORD']),
 });
 
 export default function RegisterPage() {
   const router = useRouter();
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: { name: '', email: '', password: '', role: 'TENANT' },
   });
@@ -33,7 +33,10 @@ export default function RegisterPage() {
         role: values.role,
       });
 
-      setSessionCookie(response.user.role, response.user.email);
+      if (!response.accessToken) {
+        throw new Error('The Roomly API returned an incomplete registration response.');
+      }
+      setSessionCookie(response.user.role, response.user.email, response.accessToken);
       toast.success('Account created successfully');
       router.push(getRoleDashboard(response.user.role));
     } catch (error) {

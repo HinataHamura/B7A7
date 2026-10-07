@@ -31,28 +31,23 @@ export default function LoginPage() {
     defaultValues: { email: '', password: '' },
   });
 
-  const determineRole = (email: string) => {
-    if (email.includes('admin')) return 'ADMIN';
-    if (email.includes('landlord')) return 'LANDLORD';
-    return 'TENANT';
-  };
-
   const performLogin = async (email: string, password: string) => {
     const response = await authApi.login({ email, password });
-    const role = response.user?.role ?? determineRole(email);
+    if (!response.user?.role || !response.accessToken) {
+      throw new Error('The Roomly API returned an incomplete login response.');
+    }
 
-    setSessionCookie(role, response.user?.email ?? email);
+    const role = response.user.role;
+    setSessionCookie(role, response.user.email, response.accessToken);
     localStorage.setItem('roomly_user', JSON.stringify(response.user));
-    toast.success(`Welcome back, ${response.user?.email ?? email}`);
+    toast.success(`Welcome back, ${response.user.email}`);
     router.push(getRoleDashboard(role));
   };
 
   const handleDemoLogin = async (account: (typeof demoAccounts)[number]) => {
     setLoading(true);
     try {
-      const role = account.role === 'Admin' ? 'ADMIN' : account.role === 'User' ? 'TENANT' : 'LANDLORD';
       await performLogin(account.email, account.password);
-      setSessionCookie(role, account.email);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Demo login failed');
     } finally {

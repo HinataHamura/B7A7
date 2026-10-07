@@ -3,6 +3,7 @@ node_modules
 out
 coverage
 npm-debug.log*
+*.tsbuildinfo
 .env
 .env.local
 .env.production
