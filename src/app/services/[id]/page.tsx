@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { bookingsApi, listingsApi } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
-import { ListingPhoto } from '@/components/listing-photo';
+import { ListingGallery } from '@/components/listing-gallery';
 import { ListingSaveButton } from '@/components/listing-save-button';
 import { ListingReviews } from '@/components/listing-reviews';
 
@@ -72,16 +72,7 @@ export default function ListingDetailsPage() {
       <div className="mt-5 grid gap-8 lg:grid-cols-[1.4fr_0.8fr]">
         <article className="glass-panel p-6 sm:p-8">
           <div className="relative mb-6 h-72 overflow-hidden rounded-2xl bg-slate-100 sm:h-96">
-            <ListingPhoto
-              images={listing.images}
-              title={listing.title}
-              sizes="(max-width: 1024px) 100vw, 60vw"
-            />
-            {listing.images && listing.images.length > 1 && (
-              <span className="absolute bottom-3 right-3 rounded-full bg-slate-950/75 px-3 py-1.5 text-xs font-semibold text-white">
-                {listing.images.length} photos
-              </span>
-            )}
+            <ListingGallery images={listing.images} title={listing.title} />
           </div>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
