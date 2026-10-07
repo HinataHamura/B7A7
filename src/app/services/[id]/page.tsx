@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { bookingsApi, listingsApi } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
 import { ListingPhoto } from '@/components/listing-photo';
+import { ListingSaveButton } from '@/components/listing-save-button';
 
 const bookingSchema = z.object({
   moveInDate: z.string().min(1, 'Choose a move-in date').refine(
@@ -87,7 +88,10 @@ export default function ListingDetailsPage() {
               <h1 className="mt-4 text-3xl font-black text-slate-900">{listing.title}</h1>
               <p className="mt-2 text-slate-600">{listing.addressLine}, {listing.area}, {listing.city}</p>
             </div>
-            <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">{listing.status}</span>
+            <div className="flex items-center gap-2">
+              <ListingSaveButton listingId={listing.id} />
+              <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">{listing.status}</span>
+            </div>
           </div>
           <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[

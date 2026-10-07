@@ -273,6 +273,7 @@ export const listingsApi = {
     apiRequest<ListingItem[]>(`/listings?${queryString(params)}`),
   getById: (id: string) => apiFetch<ListingItem>(`/listings/${id}`),
   getMine: () => apiFetch<ListingItem[]>('/listings/my-listings'),
+  getSaved: () => apiFetch<ListingItem[]>('/listings/saved'),
   getLandlordStats: () => apiFetch<LandlordStats>('/listings/dashboard-stats'),
   create: (payload: ListingPayload) =>
     apiFetch<ListingItem>('/listings', {

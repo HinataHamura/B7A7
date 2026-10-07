@@ -9,6 +9,7 @@ const navItems = {
   ],
   tenant: [
     { href: '/dashboard', label: 'Activity' },
+    { href: '/dashboard/saved', label: 'Saved homes' },
     { href: '/dashboard/profile', label: 'Profile' },
     { href: '/dashboard/payments', label: 'Payments' },
   ],

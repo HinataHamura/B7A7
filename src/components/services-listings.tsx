@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { listingsApi } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
 import { ListingPhoto } from '@/components/listing-photo';
+import { ListingSaveButton } from '@/components/listing-save-button';
 
 export default function ServicesListings() {
   const router = useRouter();
@@ -156,6 +157,9 @@ export default function ServicesListings() {
             <article key={listing.id} className="glass-panel flex flex-col overflow-hidden">
               <div className="relative h-56 bg-slate-100">
                 <ListingPhoto images={listing.images} title={listing.title} />
+                <div className="absolute right-3 top-3">
+                  <ListingSaveButton listingId={listing.id} />
+                </div>
                 {listing.images && listing.images.length > 1 && (
                   <span className="absolute bottom-3 right-3 rounded-full bg-slate-950/75 px-2.5 py-1 text-xs font-semibold text-white">
                     +{listing.images.length - 1} photos
