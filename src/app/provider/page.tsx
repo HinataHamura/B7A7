@@ -44,9 +44,14 @@ export default function ProviderPage() {
           <h1 className="mt-3 text-3xl font-black text-slate-900">Property overview</h1>
           <p className="mt-2 text-slate-600">Live listing, booking, and revenue data for your account.</p>
         </div>
-        <Link href="/provider/profile" className="rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white">
-          Manage profile
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/provider/listings/new" className="rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white">
+            Add a listing
+          </Link>
+          <Link href="/provider/profile" className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700">
+            Manage profile
+          </Link>
+        </div>
       </div>
 
       {(statsQuery.isError || listingsQuery.isError || bookingsQuery.isError) && (
@@ -72,7 +77,10 @@ export default function ProviderPage() {
         <div className="glass-panel overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
             <h2 className="font-bold text-slate-900">Your listings</h2>
-            <Link href="/provider/earnings" className="text-sm font-semibold text-primary-700">Earnings</Link>
+            <div className="flex gap-3">
+              <Link href="/provider/listings" className="text-sm font-semibold text-primary-700">Manage all</Link>
+              <Link href="/provider/earnings" className="text-sm font-semibold text-primary-700">Earnings</Link>
+            </div>
           </div>
           {listingsQuery.isLoading ? (
             <div className="m-5 h-20 animate-pulse rounded-xl bg-slate-100" />

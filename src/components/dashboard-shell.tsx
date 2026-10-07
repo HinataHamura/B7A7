@@ -14,6 +14,7 @@ const navItems = {
   ],
   landlord: [
     { href: '/provider', label: 'Overview' },
+    { href: '/provider/listings', label: 'Listings' },
     { href: '/provider/earnings', label: 'Earnings' },
     { href: '/provider/profile', label: 'Profile' },
   ],
