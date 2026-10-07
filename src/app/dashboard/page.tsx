@@ -26,6 +26,14 @@ export default function DashboardPage() {
     onError: (error) => toast.error(error instanceof Error ? error.message : 'Could not start checkout.'),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['tenant-payments'] }),
   });
+  const cancelBookingMutation = useMutation({
+    mutationFn: (bookingId: string) => bookingsApi.updateStatus(bookingId, 'CANCELLED'),
+    onSuccess: async () => {
+      toast.success('Booking request withdrawn.');
+      await queryClient.invalidateQueries({ queryKey: ['tenant-bookings'] });
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : 'Could not withdraw this request.'),
+  });
 
   const bookings = bookingsQuery.data ?? [];
   const payments = paymentsQuery.data ?? [];
@@ -120,6 +128,20 @@ export default function DashboardPage() {
                       </button>
                     ))}
                   </div>
+                )}
+                {booking.status === 'PENDING' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm('Withdraw this pending booking request?')) {
+                        cancelBookingMutation.mutate(booking.id);
+                      }
+                    }}
+                    disabled={cancelBookingMutation.isPending}
+                    className="rounded-full border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 disabled:opacity-60"
+                  >
+                    {cancelBookingMutation.isPending ? 'Withdrawing…' : 'Withdraw request'}
+                  </button>
                 )}
                 {booking.status === 'COMPLETED' && (
                   <div className="basis-full">
