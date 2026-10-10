@@ -6,9 +6,11 @@ import { ListingPhoto } from '@/components/listing-photo';
 export function ListingGallery({
   images,
   title,
+  type,
 }: {
   images?: string[];
   title: string;
+  type?: string;
 }) {
   const photos = images?.filter(Boolean) ?? [];
   const [activeIndex, setActiveIndex] = useState(0);
@@ -25,7 +27,7 @@ export function ListingGallery({
   return (
     <div className="h-full w-full">
       <div className="relative h-full w-full">
-        <ListingPhoto images={activeImage ? [activeImage] : undefined} title={title} />
+        <ListingPhoto images={activeImage ? [activeImage] : undefined} title={title} type={type} />
         {photos.length > 1 && (
           <>
             <button
@@ -59,9 +61,9 @@ export function ListingGallery({
               onClick={() => setActiveIndex(index)}
               aria-label={`Show photo ${index + 1}`}
               aria-pressed={activeIndex === index}
-              className={`h-12 w-16 shrink-0 overflow-hidden rounded-lg border-2 ${activeIndex === index ? 'border-white' : 'border-transparent opacity-70 hover:opacity-100'}`}
+              className={`relative h-12 w-16 shrink-0 overflow-hidden rounded-lg border-2 ${activeIndex === index ? 'border-white' : 'border-transparent opacity-70 hover:opacity-100'}`}
             >
-              <ListingPhoto images={[image]} title={`${title}, photo ${index + 1}`} />
+              <ListingPhoto images={[image]} title={`${title}, photo ${index + 1}`} type={type} showRepresentativeLabel={false} />
             </button>
           ))}
         </div>

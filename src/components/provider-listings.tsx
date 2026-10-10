@@ -116,7 +116,7 @@ export default function ProviderListings() {
           {visibleListings.map((listing) => (
             <article key={listing.id} className="glass-panel overflow-hidden sm:flex">
               <div className="relative h-48 shrink-0 bg-slate-100 sm:h-auto sm:w-52">
-                <ListingPhoto images={listing.images} title={listing.title} sizes="(max-width: 640px) 100vw, 208px" />
+                <ListingPhoto images={listing.images} title={listing.title} type={listing.type} sizes="(max-width: 640px) 100vw, 208px" />
               </div>
               <div className="flex min-w-0 flex-1 flex-col p-5">
                 <div className="flex items-start justify-between gap-3">

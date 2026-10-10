@@ -72,7 +72,7 @@ export default function ListingDetailsPage() {
       <div className="mt-5 grid gap-8 lg:grid-cols-[1.4fr_0.8fr]">
         <article className="glass-panel p-6 sm:p-8">
           <div className="relative mb-6 h-72 overflow-hidden rounded-2xl bg-slate-100 sm:h-96">
-            <ListingGallery images={listing.images} title={listing.title} />
+            <ListingGallery images={listing.images} title={listing.title} type={listing.type} />
           </div>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>

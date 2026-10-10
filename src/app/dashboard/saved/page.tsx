@@ -126,7 +126,7 @@ export default function SavedHomesPage() {
             {listings.map((listing) => (
               <article key={listing.id} className="glass-panel flex flex-col overflow-hidden">
                 <div className="relative h-56 bg-slate-100">
-                  <ListingPhoto images={listing.images} title={listing.title} />
+                  <ListingPhoto images={listing.images} title={listing.title} type={listing.type} />
                   <div className="absolute right-3 top-3">
                     <ListingSaveButton listingId={listing.id} />
                   </div>

@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 interface FeaturedListing {
   id: string;
   title: string;
+  type?: string;
   city: string;
   area: string;
   rentAmount: number | string;
@@ -30,6 +31,7 @@ function isFeaturedListing(value: unknown): value is FeaturedListing {
     typeof value.area === 'string' &&
     (typeof value.rentAmount === 'number' || typeof value.rentAmount === 'string') &&
     typeof value.bedrooms === 'number' &&
+    (value.type === undefined || typeof value.type === 'string') &&
     (value.images === undefined || (Array.isArray(value.images) && value.images.every((image) => typeof image === 'string'))) &&
     (value.landlord === undefined || (
       isRecord(value.landlord) &&
@@ -145,7 +147,7 @@ export default async function HomePage() {
               {featured ? (
                 <article className="overflow-hidden rounded-2xl bg-slate-900 text-white">
                   <div className="relative h-52 bg-slate-800">
-                    <ListingPhoto images={featured.images} title={featured.title} sizes="(max-width: 1024px) 100vw, 40vw" />
+                    <ListingPhoto images={featured.images} title={featured.title} type={featured.type} sizes="(max-width: 1024px) 100vw, 40vw" />
                   </div>
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-3">
