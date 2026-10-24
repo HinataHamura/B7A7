@@ -205,11 +205,11 @@ src/
 
 ## 🔗 GitHub Repositories
 
-- **Frontend:** _this repo_
-- **Backend (Assessment 6):** _link here_
+- **Frontend:** [https://github.com/HinataHamura/B7A7](https://github.com/HinataHamura/B7A7)
+- **Backend:** [https://github.com/HinataHamura/B7A6](https://github.com/HinataHamura/B7A6)
 
 ---
 
 ## 👤 Author
 
-**HinataHamura** — [usercse420@gmail.com](mailto:usercse420@gmail.com)
+**HinataHamura** — [eshafarzana666@gmail.com](mailto:eshafarzana666@gmail.com)
