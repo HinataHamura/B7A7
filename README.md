@@ -6,7 +6,7 @@ A production-ready, full-stack housing platform for finding rooms, managing prop
 
 ## 🌐 Live Demo
 
-**Frontend:** _Deploy URL here_  
+**Frontend:** [https://roomly-frontend-three.vercel.app](https://roomly-frontend-three.vercel.app)  
 **Backend API:** `https://b7a6.onrender.com/api/v1`
 
 ---
